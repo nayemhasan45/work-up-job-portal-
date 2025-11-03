@@ -1,10 +1,12 @@
 import { useContext } from "react";
 import { FirebaseAuthContext } from "../../contexts/firebaseAuthContext/AuthContext";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 
 const SignUp = () => {
   const { createUser ,createUserGoogle,createUserGithub} = useContext(FirebaseAuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state || '/';
   const handleSignUp = (e) => {
     e.preventDefault();
     const email = e.target.email.value;
@@ -24,7 +26,7 @@ const SignUp = () => {
   const handleGoogleSignUp=()=>{
     createUserGoogle()
     .then(()=>{
-        navigate("/");
+        navigate(from);
     })
     .catch(err=>{
       console.log(err);

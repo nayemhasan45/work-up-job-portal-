@@ -1,7 +1,6 @@
 import { Link } from "react-router";
 
 const CategoryJobs = ({card}) => {
-  console.log(card);
   const {category,_id,company,company_logo,applicationDeadline}=card;
   return (
     <div className="card w-96 bg-base-100 card-sm shadow-sm">

@@ -7,6 +7,8 @@ import Contact from "../pages/contact/Contact";
 import SignIn from "../pages/user-log/SignIn";
 import SignUp from "../pages/user-log/SignUp";
 import JobDetails from "../pages/job-category/JobDetails";
+import PrivateRoute from "./PrivateRoute";
+import ApplyJob from "../pages/job-category/ApplyJob";
 
 const router = createBrowserRouter([
   {
@@ -16,6 +18,12 @@ const router = createBrowserRouter([
       {
         index:true,
         Component:Home,
+      },
+      {
+        path:"/applyJob/:id",
+        element:<PrivateRoute>
+          <ApplyJob></ApplyJob>
+        </PrivateRoute>
       },
       {
         path:"/job-category",

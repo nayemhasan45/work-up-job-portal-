@@ -1,9 +1,12 @@
 import { useContext } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import { FirebaseAuthContext } from "../../contexts/firebaseAuthContext/AuthContext";
 
 const SignIn = () => {
   const {signinUser}=useContext(FirebaseAuthContext);
+  const location = useLocation();
+  const from = location.state || '/';
+  console.log(location)
   const navigate = useNavigate();
     const handleSignIn = (e) => {
         e.preventDefault();
@@ -13,7 +16,7 @@ const SignIn = () => {
         signinUser(email,password)
         .then(res=>{
           console.log("user loged in successfully ",res);
-          navigate("/");
+          navigate(from);
         })
         .catch(err=>console.log(err))
     }

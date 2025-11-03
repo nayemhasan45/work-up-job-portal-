@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
 import CategoryJobs from "../../components/CategoryJobs";
+import LoadingSpinner from "../../components/LoadingSpinner";
 
 const LatestJobs = () => {
   const { data, isPending, error } = useQuery({
@@ -8,7 +9,7 @@ const LatestJobs = () => {
     queryFn: () =>
       fetch("http://localhost:3000/jobs").then((res) => res.json()),
   });
-  if (isPending) return "Loading...";
+  if (isPending) return <LoadingSpinner></LoadingSpinner>;
 
   if (error) return "An error has occurred: " + error.message;
 //   console.log(data);
