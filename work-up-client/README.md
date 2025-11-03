@@ -8,6 +8,8 @@ This is the client-side application for WorkUp, a modern job portal built with R
 *   Browse and search for job listings.
 *   View detailed information for each job.
 *   Apply for jobs.
+*   Displays latest jobs on the home page.
+*   View job details by clicking on a job card.
 
 ## Technologies Used
 
@@ -15,6 +17,7 @@ This is the client-side application for WorkUp, a modern job portal built with R
 *   **Build Tool:** Vite
 *   **Styling:** Tailwind CSS & DaisyUI
 *   **Routing:** React Router
+*   **Data Fetching:** TanStack Query
 *   **Authentication:** Firebase
 
 ## Getting Started

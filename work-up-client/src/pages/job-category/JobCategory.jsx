@@ -1,6 +1,6 @@
 import React from 'react';
 
-const jobCategory = () => {
+const JobCategory = () => {
     return (
         <div>
             <h1>this is category</h1>
@@ -8,4 +8,4 @@ const jobCategory = () => {
     );
 };
 
-export default jobCategory;
+export default JobCategory;
