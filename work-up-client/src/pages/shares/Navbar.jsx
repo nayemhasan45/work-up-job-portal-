@@ -18,9 +18,17 @@ const Navbar = () => {
       <NavLink className={"pr-5"} to={"/contact"}>
         <p>Contact</p>
       </NavLink>
+
+      {/* application  */}
       {initialUser && (
         <NavLink className={"pr-5"} to={"/applications"}>
           <p>My Applications</p>
+        </NavLink>
+      )}
+      {/* add jobs  */}
+      {initialUser && (
+        <NavLink className={"pr-5"} to={"/addJob"}>
+          <p>Add Job</p>
         </NavLink>
       )}
     </>
