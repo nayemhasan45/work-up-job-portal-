@@ -68,3 +68,15 @@ nodemon index.js
 *   **Dependencies:** All dependencies are listed in the `package.json` file.
 *   **Environment Variables:** All secrets and environment-specific configurations are stored in a `.env` file.
 *   **Code Style:** The code follows standard JavaScript conventions.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a pull request or open an issue.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgement
+
+This project is created by [Al-Amin](https://github.com/al-amin-dev).
