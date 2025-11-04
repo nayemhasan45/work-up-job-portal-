@@ -2,6 +2,7 @@ import React from "react";
 import bannerBg from "../../assets/bannerBg.jpg";
 import { useInView } from "react-intersection-observer";
 import CountUp from "react-countup";
+// eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 
 const Banner = () => {

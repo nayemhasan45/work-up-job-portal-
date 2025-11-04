@@ -8,10 +8,10 @@ const PrivateRoute = ({children}) => {
     const location = useLocation();
     console.log(location.pathname);
     if(loading){
-        return <p>loading ...............................................</p>
+        return <LoadingSpinner></LoadingSpinner>
     }
     if(!initialUser){
-        return <Navigate state={location.pathname} to={'/signin'}></Navigate>
+        return <Navigate state={{ from: location }} to={'/signin'} replace></Navigate>
     }
     return children
 };

@@ -5,6 +5,8 @@ This is the client-side application for WorkUp, a modern job portal built with R
 ## Features
 
 *   User authentication (Sign Up, Sign In, Sign Out) with Firebase.
+*   Social login with Google and GitHub.
+*   Protected routes to ensure only authenticated users can access certain pages.
 *   Browse and search for job listings.
 *   View detailed information for each job.
 *   Apply for jobs.
@@ -40,16 +42,18 @@ This is the client-side application for WorkUp, a modern job portal built with R
 
 ### Environment Variables
 
-Create a `.env.local` file in the root of the project and add the following environment variables:
+Create a `.env.local` file in the root of the project and add your Firebase project configuration:
 
 ```
-VITE_SOME_apiKey=your-api-key
-VITE_SOME_authDomain=your-auth-domain
-VITE_SOME_projectId=your-project-id
-VITE_SOME_storageBucket=your-storage-bucket
-VITE_SOME_messagingSenderId=your-messaging-sender-id
-VITE_SOME_appId=your-app-id
+VITE_SOME_apiKey=your-firebase-api-key
+VITE_SOME_authDomain=your-firebase-auth-domain
+VITE_SOME_projectId=your-firebase-project-id
+VITE_SOME_storageBucket=your-firebase-storage-bucket
+VITE_SOME_messagingSenderId=your-firebase-messaging-sender-id
+VITE_SOME_appId=your-firebase-app-id
 ```
+
+Replace `your-firebase-...` with the actual credentials from your Firebase project console.
 
 ### Running the Application
 
@@ -72,7 +76,10 @@ The project follows a feature-based folder structure:
 ├───hooks/
 ├───layouts/
 ├───pages/
+│   ├───blogs/
+│   ├───contact/
 │   ├───home/
+│   ├───job-category/
 │   ├───shares/
 │   └───user-log/
 ├───routes/

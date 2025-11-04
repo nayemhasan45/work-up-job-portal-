@@ -1,12 +1,13 @@
 import { useContext } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { FirebaseAuthContext } from "../../contexts/firebaseAuthContext/AuthContext";
+import SocialLogin from "./SocialLogin";
 
 const SignIn = () => {
   const {signinUser}=useContext(FirebaseAuthContext);
   const location = useLocation();
-  const from = location.state || '/';
-  console.log(location)
+  const from = location.state?.from?.pathname || "/";
+  // console.log(from)
   const navigate = useNavigate();
     const handleSignIn = (e) => {
         e.preventDefault();
@@ -41,6 +42,7 @@ const SignIn = () => {
               </div>
             </fieldset>
           </form>
+          <SocialLogin />
         </div>
       </div>
     </div>

@@ -22,8 +22,8 @@ const router = createBrowserRouter([
       {
         path:"/applyJob/:id",
         element:<PrivateRoute>
-          <ApplyJob></ApplyJob>
-        </PrivateRoute>
+                  <ApplyJob></ApplyJob>
+                </PrivateRoute>
       },
       {
         path:"/job-category",
