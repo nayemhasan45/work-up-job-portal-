@@ -6,7 +6,6 @@ import LoadingSpinner from '../components/LoadingSpinner';
 const PrivateRoute = ({children}) => {
     const {initialUser,loading}=useContext(FirebaseAuthContext);
     const location = useLocation();
-    console.log(location.pathname);
     if(loading){
         return <LoadingSpinner></LoadingSpinner>
     }

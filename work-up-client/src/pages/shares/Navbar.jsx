@@ -15,9 +15,14 @@ const Navbar = () => {
       <NavLink className={"pr-5"} to={"/blog"}>
         <p>Blog</p>
       </NavLink>
-      <NavLink className={""} to={"/contact"}>
+      <NavLink className={"pr-5"} to={"/contact"}>
         <p>Contact</p>
       </NavLink>
+      {initialUser && (
+        <NavLink className={"pr-5"} to={"/applications"}>
+          <p>My Applications</p>
+        </NavLink>
+      )}
     </>
   );
   const handleSignOut = () => {
@@ -68,7 +73,9 @@ const Navbar = () => {
             <Link className="btn" to={"/signin"}>
               Sign in
             </Link>
-            <Link className="btn" to={"/signup"}>Sign Up</Link>
+            <Link className="btn" to={"/signup"}>
+              Sign Up
+            </Link>
           </>
         )}
       </div>
