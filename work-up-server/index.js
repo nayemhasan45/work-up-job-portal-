@@ -1,13 +1,20 @@
 const express = require('express');
 const cors = require('cors');
-require('dotenv').config()
+const cookieParser = require('cookie-parser');
+require('dotenv').config();
+const jwt = require('jsonwebtoken');
+
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
 const port = process.env.PORT || 3000;
 
 // middleware 
-app.use(cors());
+app.use(cors({
+  origin:['http://localhost:5173'],
+  credentials:true,
+}));
 app.use(express.json());
+app.use(cookieParser());
 
 
 
@@ -29,9 +36,21 @@ async function run() {
     const jobColection = client.db("work-up").collection("jobs");
     const applicantCollection = client.db("work-up").collection("applicats");
 
+    // jwt token apis ---------------------------------------
+    app.post('/jwt', async (req, res) => {
+      const { email } = req.body;
+      const user = { email };
+      const token = jwt.sign( user, process.env.JWT_TOKEN_SECRET, { expiresIn: '1h' });
+      res.cookie('jwt_token',token,{
+        httpOnly:true,
+        secure:false,
+      })
+      res.send({ success: true  });
+    })
+
     // get josbs
     app.get('/jobs', async (req, res) => {
-      const cursor = (await jobColection).find();
+      const cursor = jobColection.find();
       const result = await cursor.toArray();
       res.send(result);
     })
@@ -44,7 +63,7 @@ async function run() {
       res.send(result);
     })
     // post a job 
-    app.post('/jobs',async(req,res)=>{
+    app.post('/jobs', async (req, res) => {
       const addJob = req.body;
       const result = await jobColection.insertOne(addJob);
       res.send(result);
