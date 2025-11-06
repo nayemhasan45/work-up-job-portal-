@@ -21,7 +21,7 @@ const ApplyJob = () => {
       github,
     };
     axios
-      .post("http://localhost:3000/applicant", aplication)
+      .post("https://work-up-server.vercel.app/applicant", aplication)
       .then((res) => {
         console.log(res.data);
         if (res.data.insertedId) {

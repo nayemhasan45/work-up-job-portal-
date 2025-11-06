@@ -7,7 +7,7 @@ const LatestJobs = () => {
   const { data, isPending, error } = useQuery({
     queryKey: ["homePageJobs"],
     queryFn: () =>
-      fetch("http://localhost:3000/jobs").then((res) => res.json()),
+      fetch("https://work-up-server.vercel.app/jobs").then((res) => res.json()),
   });
   if (isPending) return <LoadingSpinner></LoadingSpinner>;
 

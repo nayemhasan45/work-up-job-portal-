@@ -53,7 +53,7 @@ const AuthProvider = ({ children }) => {
       console.log(currentUser);
       if(currentUser?.email){
         const userData = {email:currentUser.email};
-        axios.post("http://localhost:3000/jwt",userData,{
+        axios.post("https://work-up-server.vercel.app/jwt",userData,{
           withCredentials:true,
         })
         .then(res=>console.log(res.data))

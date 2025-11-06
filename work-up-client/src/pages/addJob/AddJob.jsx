@@ -28,7 +28,7 @@ const AddJob = () => {
 
     // add job to the database
     axios
-      .post("http://localhost:3000/jobs", jobData)
+      .post("https://work-up-server.vercel.app/jobs", jobData)
       .then((res) => {
         console.log(res);
         if (res.data.insertedId) {

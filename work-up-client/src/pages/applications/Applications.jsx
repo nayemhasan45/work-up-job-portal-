@@ -10,7 +10,7 @@ const Applications = () => {
   const { data, isLoading } = useQuery({
     queryKey: ["applications", initialUser?.email],
     queryFn: async () => {
-      const res = await fetch(`http://localhost:3000/applicant?email=${initialUser?.email}`,{
+      const res = await fetch(`https://work-up-server.vercel.app/applicant?email=${initialUser?.email}`,{
         method:"GET",
         credentials:"include",
       });
