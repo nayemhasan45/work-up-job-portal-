@@ -10,9 +10,10 @@ const Applications = () => {
   const { data, isLoading } = useQuery({
     queryKey: ["applications", initialUser?.email],
     queryFn: async () => {
-      const res = await fetch(
-        `http://localhost:3000/applicant?email=${initialUser?.email}`
-      );
+      const res = await fetch(`http://localhost:3000/applicant?email=${initialUser?.email}`,{
+        method:"GET",
+        credentials:"include",
+      });
       const data = await res.json();
       return data;
     },
@@ -43,7 +44,7 @@ console.log(data)
           </thead>
           <tbody>
            {
-            data.map((row,index)=><ApplicationsRow key={row._id} index={index} row={row}></ApplicationsRow>)
+            data?.map((row,index)=><ApplicationsRow key={row._id} index={index} row={row}></ApplicationsRow>)
            }
           </tbody>
         </table>
