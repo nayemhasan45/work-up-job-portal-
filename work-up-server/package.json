@@ -4,7 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"No tests available\"",
+    "lint": "eslint .",
+    "prettier": "prettier --write .",
+    "prepare": "husky install"
   },
   "keywords": [],
   "author": "",
@@ -16,7 +21,13 @@
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "mongodb": "^6.20.0",
+    "mongodb": "^6.2.0",
     "nodemon": "^3.1.10"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "globals": "^15.8.0",
+    "husky": "^9.1.4",
+    "prettier": "^3.3.3"
   }
 }

@@ -8,15 +8,28 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// middleware 
-app.use(cors({
-  origin:['http://localhost:5173'],
-  credentials:true,
-}));
+// middleware
+app.use(
+  cors({
+    origin: ['http://localhost:5173'],
+    credentials: true,
+  }),
+);
 app.use(express.json());
 app.use(cookieParser());
-
-
+const verifyToken = (req, res, next) => {
+  const token = req?.cookies?.jwt_token;
+  if (!token) {
+    return res.status(401).send({ message: 'unauthorize access' });
+  }
+  jwt.verify(token, process.env.JWT_TOKEN_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(401).send({ message: 'unauthorized access' });
+    }
+    req.decoded = decoded;
+    next();
+  });
+};
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster1.szp5gbl.mongodb.net/?appName=cluster1`;
 
@@ -26,34 +39,36 @@ const client = new MongoClient(uri, {
     version: ServerApiVersion.v1,
     strict: true,
     deprecationErrors: true,
-  }
+  },
 });
 
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
-    const jobColection = client.db("work-up").collection("jobs");
-    const applicantCollection = client.db("work-up").collection("applicats");
+    const jobColection = client.db('work-up').collection('jobs');
+    const applicantCollection = client.db('work-up').collection('applicats');
 
     // jwt token apis ---------------------------------------
     app.post('/jwt', async (req, res) => {
       const { email } = req.body;
       const user = { email };
-      const token = jwt.sign( user, process.env.JWT_TOKEN_SECRET, { expiresIn: '1h' });
-      res.cookie('jwt_token',token,{
-        httpOnly:true,
-        secure:false,
-      })
-      res.send({ success: true  });
-    })
+      const token = jwt.sign(user, process.env.JWT_TOKEN_SECRET, {
+        expiresIn: '1h',
+      });
+      res.cookie('jwt_token', token, {
+        httpOnly: true,
+        secure: false,
+      });
+      res.send({ success: true });
+    });
 
     // get josbs
     app.get('/jobs', async (req, res) => {
       const cursor = jobColection.find();
       const result = await cursor.toArray();
       res.send(result);
-    })
+    });
 
     //get job by id
     app.get('/jobs/:id', async (req, res) => {
@@ -61,33 +76,39 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const result = await jobColection.findOne(query);
       res.send(result);
-    })
-    // post a job 
+    });
+    // post a job
     app.post('/jobs', async (req, res) => {
       const addJob = req.body;
       const result = await jobColection.insertOne(addJob);
       res.send(result);
-    })
+    });
 
-    // applicants related api 
-    app.get('/applicant', async (req, res) => {
+    // applicants related api
+    app.get('/applicant', verifyToken, async (req, res) => {
       const email = req.query.email;
+      // console.log('inside server side',req.cookies)
+      // verify token
+      if (email !== req.decoded.email) {
+        return res.status(404).send({ message: 'forbidden access' });
+      }
       const query = {
         applicant: email,
       };
       const result = await applicantCollection.find(query).toArray();
       res.send(result);
-    })
+    });
     app.post('/applicant', async (req, res) => {
       const applicant = req.body;
       const result = await applicantCollection.insertOne(applicant);
       res.send(result);
-    })
-
+    });
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    await client.db('admin').command({ ping: 1 });
+    console.log(
+      'Pinged your deployment. You successfully connected to MongoDB!',
+    );
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
@@ -95,8 +116,6 @@ async function run() {
 }
 run().catch(console.dir);
 
-
-
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
-})
+  console.log(`Example app listening on port ${port}`);
+});
