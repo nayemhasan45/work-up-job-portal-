@@ -3,24 +3,72 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
-
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+
 const app = express();
-const port = process.env.PORT || 3000;
 
 // middleware
+const allowedOriginsEnv = process.env.ALLOWED_ORIGINS || '';
+const allowedOrigins = allowedOriginsEnv
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean);
+
 app.use(
   cors({
-    origin: ['http://localhost:5173'],
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
-  }),
+  })
 );
 app.use(express.json());
 app.use(cookieParser());
+
+// MongoDB setup
+const client = new MongoClient(process.env.MONGODB_URI, {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  },
+});
+
+let jobCollection;
+let applicantCollection;
+let isConnected = false;
+
+async function connectDB() {
+  try {
+    if (isConnected) {
+      return;
+    }
+    await client.connect();
+    const dbName = process.env.MONGODB_DB_NAME || 'work-up';
+    const db = client.db(dbName);
+    jobCollection = db.collection('jobs');
+    applicantCollection = db.collection('applicats');
+    isConnected = true;
+    console.log('✅ MongoDB connected to database:', dbName);
+  } catch (error) {
+    console.error('❌ MongoDB connection failed:', error);
+    isConnected = false;
+    throw error;
+  }
+}
+
+// Initialize connection
+connectDB().catch(console.error);
+
+// JWT middleware
 const verifyToken = (req, res, next) => {
   const token = req?.cookies?.jwt_token;
   if (!token) {
-    return res.status(401).send({ message: 'unauthorize access' });
+    return res.status(401).send({ message: 'unauthorized access' });
   }
   jwt.verify(token, process.env.JWT_TOKEN_SECRET, (err, decoded) => {
     if (err) {
@@ -31,91 +79,141 @@ const verifyToken = (req, res, next) => {
   });
 };
 
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster1.szp5gbl.mongodb.net/?appName=cluster1`;
-
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  },
+// routes
+app.get('/', (req, res) => {
+  res.send('Server is ready');
 });
 
-async function run() {
+// Health check endpoint
+app.get('/health', async (req, res) => {
   try {
-    // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
-    const jobColection = client.db('work-up').collection('jobs');
-    const applicantCollection = client.db('work-up').collection('applicats');
-
-    // jwt token apis ---------------------------------------
-    app.post('/jwt', async (req, res) => {
-      const { email } = req.body;
-      const user = { email };
-      const token = jwt.sign(user, process.env.JWT_TOKEN_SECRET, {
-        expiresIn: '1h',
-      });
-      res.cookie('jwt_token', token, {
-        httpOnly: true,
-        secure: false,
-      });
-      res.send({ success: true });
+    if (!isConnected || !jobCollection) {
+      await connectDB();
+    }
+    // Test connection by pinging the database
+    await client.db().admin().ping();
+    res.send({ 
+      status: 'healthy', 
+      connected: isConnected,
+      database: process.env.MONGODB_DB_NAME || 'work-up'
     });
-
-    // get josbs
-    app.get('/jobs', async (req, res) => {
-      const cursor = jobColection.find();
-      const result = await cursor.toArray();
-      res.send(result);
+  } catch (error) {
+    res.status(503).send({ 
+      status: 'unhealthy', 
+      connected: false,
+      error: error.message 
     });
-
-    //get job by id
-    app.get('/jobs/:id', async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const result = await jobColection.findOne(query);
-      res.send(result);
-    });
-    // post a job
-    app.post('/jobs', async (req, res) => {
-      const addJob = req.body;
-      const result = await jobColection.insertOne(addJob);
-      res.send(result);
-    });
-
-    // applicants related api
-    app.get('/applicant', verifyToken, async (req, res) => {
-      const email = req.query.email;
-      // console.log('inside server side',req.cookies)
-      // verify token
-      if (email !== req.decoded.email) {
-        return res.status(404).send({ message: 'forbidden access' });
-      }
-      const query = {
-        applicant: email,
-      };
-      const result = await applicantCollection.find(query).toArray();
-      res.send(result);
-    });
-    app.post('/applicant', async (req, res) => {
-      const applicant = req.body;
-      const result = await applicantCollection.insertOne(applicant);
-      res.send(result);
-    });
-
-    // Send a ping to confirm a successful connection
-    await client.db('admin').command({ ping: 1 });
-    console.log(
-      'Pinged your deployment. You successfully connected to MongoDB!',
-    );
-  } finally {
-    // Ensures that the client will close when you finish/error
-    // await client.close();
   }
-}
-run().catch(console.dir);
-
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
 });
+
+app.post('/jwt', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).send({ error: 'Email is required' });
+    }
+    const user = { email };
+    const token = jwt.sign(user, process.env.JWT_TOKEN_SECRET, { expiresIn: '1h' });
+    const isProduction = process.env.NODE_ENV === 'production';
+    res.cookie('jwt_token', token, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
+    });
+    res.send({ success: true });
+  } catch (error) {
+    console.error('Error creating JWT:', error);
+    res.status(500).send({ error: 'Failed to create token', message: error.message });
+  }
+});
+
+// job APIs
+app.get('/jobs', async (req, res) => {
+  try {
+    if (!isConnected || !jobCollection) {
+      await connectDB();
+    }
+    const result = await jobCollection.find().toArray();
+    res.send(result);
+  } catch (error) {
+    console.error('Error fetching jobs:', error);
+    res.status(500).send({ error: 'Failed to fetch jobs', message: error.message });
+  }
+});
+
+app.get('/jobs/:id', async (req, res) => {
+  try {
+    if (!isConnected || !jobCollection) {
+      await connectDB();
+    }
+    const id = req.params.id;
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).send({ error: 'Invalid job ID format' });
+    }
+    const result = await jobCollection.findOne({ _id: new ObjectId(id) });
+    if (!result) {
+      return res.status(404).send({ error: 'Job not found' });
+    }
+    res.send(result);
+  } catch (error) {
+    console.error('Error fetching job:', error);
+    res.status(500).send({ error: 'Failed to fetch job', message: error.message });
+  }
+});
+
+app.post('/jobs', async (req, res) => {
+  try {
+    if (!isConnected || !jobCollection) {
+      await connectDB();
+    }
+    const addJob = req.body;
+    const result = await jobCollection.insertOne(addJob);
+    res.send(result);
+  } catch (error) {
+    console.error('Error creating job:', error);
+    res.status(500).send({ error: 'Failed to create job', message: error.message });
+  }
+});
+
+// applicant APIs
+app.get('/applicant', verifyToken, async (req, res) => {
+  try {
+    if (!isConnected || !applicantCollection) {
+      await connectDB();
+    }
+    const email = req.query.email;
+    if (email !== req.decoded.email) {
+      return res.status(403).send({ message: 'forbidden access' });
+    }
+    const result = await applicantCollection.find({ applicant: email }).toArray();
+    res.send(result);
+  } catch (error) {
+    console.error('Error fetching applicants:', error);
+    res.status(500).send({ error: 'Failed to fetch applicants', message: error.message });
+  }
+});
+
+app.post('/applicant', async (req, res) => {
+  try {
+    if (!isConnected || !applicantCollection) {
+      await connectDB();
+    }
+    const applicant = req.body;
+    const result = await applicantCollection.insertOne(applicant);
+    res.send(result);
+  } catch (error) {
+    console.error('Error creating applicant:', error);
+    res.status(500).send({ error: 'Failed to create applicant', message: error.message });
+  }
+});
+
+// Export app for Vercel
+module.exports = app;
+
+// Local development server (not used on Vercel)
+if (require.main === module) {
+  const port = process.env.PORT || 3000;
+  app.listen(port, () => {
+    console.log(`🚀 Server running on http://localhost:${port}`);
+  });
+}

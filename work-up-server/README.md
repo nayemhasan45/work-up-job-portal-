@@ -74,9 +74,10 @@ The main application logic is in `index.js`. This file:
 
 To run this project, you will need to add the following environment variables to your `.env` file:
 
-- `DB_USER`: Your MongoDB database user.
-- `DB_PASS`: Your MongoDB database password.
+- `MONGODB_URI`: Your MongoDB connection string (SRV or standard URI).
+- `MONGODB_DB_NAME`: The database name to use (e.g., `workup`).
 - `JWT_TOKEN_SECRET`: Your secret for generating JWT tokens.
+- `ALLOWED_ORIGINS`: Comma-separated list of allowed origins for CORS.
 
 ## Run Locally
 
@@ -121,6 +122,8 @@ To deploy this project, you can use any service that supports Node.js applicatio
   ]
 }
 ```
+
+On Vercel, set the environment variables `MONGODB_URI`, `MONGODB_DB_NAME`, `JWT_TOKEN_SECRET`, and `ALLOWED_ORIGINS` in the Project Settings → Environment Variables. For cross-site cookies, ensure your domain is included in `ALLOWED_ORIGINS` and that you are using HTTPS in production.
 
 2.  Push your code to a GitHub repository.
 
