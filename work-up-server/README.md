@@ -159,4 +159,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Author
 
-- **Al-Amin** - [https://github.com/al-amin-dev](https://github.com/al-amin-dev)
+- **Al-Amin** - [[https://github.com/al-amin-dev](https://github.com/nayemhasan45)]([https://github.com/al-amin-dev](https://github.com/nayemhasan45))
